@@ -5,7 +5,7 @@ from contextlib import asynccontextmanager
 from app.core.config import settings
 from app.db.session import engine
 from app.db.base import Base
-from app.routers import tasks, auth, tags, timelogs, focus, workspaces
+from app.routers import tasks, auth, tags, timelogs, focus, workspaces, git
 
 
 @asynccontextmanager
@@ -39,6 +39,7 @@ app.include_router(tags.router, prefix="/api/v1/tags", tags=["tags"])
 app.include_router(timelogs.router, prefix="/api/v1/timelogs", tags=["timelogs"])
 app.include_router(focus.router, prefix="/api/v1/focus", tags=["focus"])
 app.include_router(workspaces.router, prefix="/api/v1/workspaces", tags=["workspaces"])
+app.include_router(git.router, prefix="/api/v1/git", tags=["git"])
 
 
 @app.get("/api/v1/health", tags=["health"])

@@ -1,6 +1,6 @@
 "use client";
 
-import { use } from "react";
+import { use, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
   useTask,
@@ -13,6 +13,7 @@ import {
 import { FocusTimer } from "@/components/FocusTimer";
 import { TimeLogChart } from "@/components/TimeLogChart";
 import { WorkspaceBadge } from "@/components/WorkspaceBadge";
+import { TaskForm } from "@/components/TaskForm";
 import {
   STATUS_LABELS,
   STATUS_COLORS,
@@ -22,7 +23,7 @@ import {
   cn,
 } from "@/lib/utils";
 import { TaskStatus, TaskPriority } from "@/types";
-import { ArrowLeft, Trash2, GitBranch, Calendar, Tag } from "lucide-react";
+import { ArrowLeft, Trash2, GitBranch, Calendar, Tag, Pencil } from "lucide-react";
 
 interface Props {
   params: Promise<{ id: string }>;
@@ -32,6 +33,7 @@ export default function TaskDetailPage({ params }: Props) {
   const { id: rawId } = use(params);
   const id = Number(rawId);
   const router = useRouter();
+  const [showEdit, setShowEdit] = useState(false);
 
   const { data: task, isLoading } = useTask(id);
   const { data: timeLogs = [] } = useTimeLogs(id);
@@ -94,12 +96,20 @@ export default function TaskDetailPage({ params }: Props) {
           >
             <ArrowLeft className="w-4 h-4" /> Tasks
           </button>
-          <button
-            onClick={handleDelete}
-            className="flex items-center gap-1 text-sm text-destructive hover:bg-destructive/10 px-2 py-1 rounded-md transition"
-          >
-            <Trash2 className="w-4 h-4" /> Delete
-          </button>
+          <div className="flex items-center gap-1">
+            <button
+              onClick={() => setShowEdit(true)}
+              className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground px-2 py-1 rounded-md hover:bg-accent transition"
+            >
+              <Pencil className="w-4 h-4" /> Edit
+            </button>
+            <button
+              onClick={handleDelete}
+              className="flex items-center gap-1 text-sm text-destructive hover:bg-destructive/10 px-2 py-1 rounded-md transition"
+            >
+              <Trash2 className="w-4 h-4" /> Delete
+            </button>
+          </div>
         </div>
       </header>
 
@@ -216,6 +226,10 @@ export default function TaskDetailPage({ params }: Props) {
           </section>
         )}
       </main>
+
+      {showEdit && task && (
+        <TaskForm task={task} onClose={() => setShowEdit(false)} />
+      )}
     </div>
   );
 }

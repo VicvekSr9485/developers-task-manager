@@ -33,6 +33,9 @@ class Settings(BaseSettings):
         "http://localhost",
     ]
 
+    # Git integration
+    GIT_REPO_PATH: str = "/repo"  # overridden by GIT_REPO_PATH env var in docker-compose
+
 
 settings = Settings()
 

@@ -16,6 +16,9 @@ import {
   FocusSessionCreate,
   WorkspaceSnapshot,
   WorkspaceSnapshotCreate,
+  Tag,
+  TagCreate,
+  TagUpdate,
 } from "@/types";
 
 // ─── Tasks ───────────────────────────────────────────────────────────────────
@@ -50,6 +53,19 @@ export function useUpdateTask(id: number) {
   return useMutation<Task, Error, TaskUpdate>({
     mutationFn: (data) => api.patch(`/tasks/${id}`, data).then((r) => r.data),
     onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["tasks"] });
+      qc.invalidateQueries({ queryKey: ["tasks", id] });
+    },
+  });
+}
+
+// Generic patch — use this when the task id is only known at call-time (e.g. Kanban DnD)
+export function usePatchTask() {
+  const qc = useQueryClient();
+  return useMutation<Task, Error, { id: number; data: TaskUpdate }>({
+    mutationFn: ({ id, data }) =>
+      api.patch(`/tasks/${id}`, data).then((r) => r.data),
+    onSuccess: (_task, { id }) => {
       qc.invalidateQueries({ queryKey: ["tasks"] });
       qc.invalidateQueries({ queryKey: ["tasks", id] });
     },
@@ -139,5 +155,38 @@ export function useSaveSnapshot() {
     mutationFn: (data) => api.post("/workspaces", data).then((r) => r.data),
     onSuccess: (_data, vars) =>
       qc.invalidateQueries({ queryKey: ["snapshot", vars.task_id] }),
+  });
+}
+
+// ─── Tags ────────────────────────────────────────────────────────────────────
+
+export function useTags() {
+  return useQuery<Tag[]>({
+    queryKey: ["tags"],
+    queryFn: () => api.get("/tags").then((r) => r.data),
+  });
+}
+
+export function useCreateTag() {
+  const qc = useQueryClient();
+  return useMutation<Tag, Error, TagCreate>({
+    mutationFn: (data) => api.post("/tags", data).then((r) => r.data),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["tags"] }),
+  });
+}
+
+export function useUpdateTag(id: number) {
+  const qc = useQueryClient();
+  return useMutation<Tag, Error, TagUpdate>({
+    mutationFn: (data) => api.patch(`/tags/${id}`, data).then((r) => r.data),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["tags"] }),
+  });
+}
+
+export function useDeleteTag() {
+  const qc = useQueryClient();
+  return useMutation<void, Error, number>({
+    mutationFn: (id) => api.delete(`/tags/${id}`).then((r) => r.data),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["tags"] }),
   });
 }

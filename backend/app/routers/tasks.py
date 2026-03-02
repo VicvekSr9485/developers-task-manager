@@ -8,6 +8,7 @@ from app.core.deps import get_db, get_current_user_id
 from app.models.task import Task, TaskStatus, TaskPriority
 from app.models.tag import Tag
 from app.schemas.task import TaskCreate, TaskUpdate, TaskOut, TaskListOut
+from app.services.task_service import get_tasks_by_branch
 
 router = APIRouter()
 
@@ -112,6 +113,17 @@ async def update_task(
     await db.commit()
     await db.refresh(task, ["tags"])
     return task
+
+
+@router.get("/branch/{branch_name}", response_model=list[TaskOut])
+async def tasks_by_branch(
+    branch_name: str,
+    user_id: int = Depends(get_current_user_id),
+    db: AsyncSession = Depends(get_db),
+):
+    """Return all tasks linked to a specific git branch name."""
+    tasks = await get_tasks_by_branch(branch_name, user_id, db)
+    return tasks
 
 
 @router.delete("/{task_id}", status_code=status.HTTP_204_NO_CONTENT)

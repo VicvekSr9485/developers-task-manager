@@ -8,7 +8,7 @@ import { TaskStatus, TaskPriority, Task } from "@/types";
 import { STATUS_LABELS, STATUS_COLORS, PRIORITY_LABELS, PRIORITY_COLORS, cn } from "@/lib/utils";
 import { TaskForm } from "@/components/TaskForm";
 import { KanbanBoard } from "@/components/KanbanBoard";
-import { Plus, LayoutGrid, List, LogOut, Moon, Sun } from "lucide-react";
+import { Plus, LayoutGrid, List, LogOut, Moon, Sun, Tag } from "lucide-react";
 import { useTheme } from "next-themes";
 
 const STATUSES = Object.values(TaskStatus);
@@ -60,6 +60,13 @@ export default function TasksPage() {
               className="p-2 rounded-md hover:bg-accent transition"
             >
               {theme === "dark" ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+            </button>
+            <button
+              onClick={() => router.push("/tags")}
+              className="p-2 rounded-md hover:bg-accent transition"
+              title="Manage tags"
+            >
+              <Tag className="w-4 h-4" />
             </button>
             <span className="text-sm text-muted-foreground hidden sm:block">{user?.email}</span>
             <button

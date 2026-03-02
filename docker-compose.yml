@@ -44,10 +44,12 @@ services:
     environment:
       DATABASE_URL: postgresql+asyncpg://${POSTGRES_USER:-devtaskr}:${POSTGRES_PASSWORD:-devtaskr_password}@postgres:5432/${POSTGRES_DB:-devtaskr}
       REDIS_URL: redis://redis:6379/0
+      GIT_REPO_PATH: /repo
     ports:
       - "8000:8000"
     volumes:
       - ./backend:/app
+      - ..:/repo:ro
     depends_on:
       postgres:
         condition: service_healthy
@@ -66,8 +68,10 @@ services:
     environment:
       DATABASE_URL: postgresql+asyncpg://${POSTGRES_USER:-devtaskr}:${POSTGRES_PASSWORD:-devtaskr_password}@postgres:5432/${POSTGRES_DB:-devtaskr}
       REDIS_URL: redis://redis:6379/0
+      GIT_REPO_PATH: /repo
     volumes:
       - ./backend:/app
+      - ..:/repo:ro
     depends_on:
       - backend
       - redis
@@ -109,7 +113,7 @@ services:
     container_name: devtaskr_pgadmin
     restart: unless-stopped
     environment:
-      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL:-admin@devtaskr.local}
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL:-admin@devtaskr.com}
       PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD:-admin}
     ports:
       - "5050:80"
