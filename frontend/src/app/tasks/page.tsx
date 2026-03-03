@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { useTasks } from "@/hooks/useTasks";
+import { useTasks, useTags } from "@/hooks/useTasks";
 import { useAppStore } from "@/store/useAppStore";
 import { TaskStatus, TaskPriority, Task } from "@/types";
 import { STATUS_LABELS, STATUS_COLORS, PRIORITY_LABELS, PRIORITY_COLORS, cn } from "@/lib/utils";
@@ -23,6 +23,16 @@ export default function TasksPage() {
   const [statusFilter, setStatusFilter] = useState<TaskStatus | undefined>();
   const [priorityFilter, setPriorityFilter] = useState<TaskPriority | undefined>();
   const [search, setSearch] = useState("");
+  const [tagFilter, setTagFilter] = useState<Set<number>>(new Set());
+
+  const { data: tagsData = [] } = useTags();
+
+  const toggleTagFilter = (id: number) =>
+    setTagFilter((prev) => {
+      const next = new Set(prev);
+      next.has(id) ? next.delete(id) : next.add(id);
+      return next;
+    });
 
   const { data, isLoading } = useTasks({
     status: statusFilter,
@@ -30,7 +40,11 @@ export default function TasksPage() {
     search: search || undefined,
   });
 
-  const tasks = data?.items ?? [];
+  const allTasks = data?.items ?? [];
+  const tasks =
+    tagFilter.size === 0
+      ? allTasks
+      : allTasks.filter((t) => t.tags.some((tag) => tagFilter.has(tag.id)));
 
   const handleLogout = () => {
     logout();
@@ -116,8 +130,39 @@ export default function TasksPage() {
               ))}
             </select>
 
+            {/* Tag filter pills */}
+            {tagsData.length > 0 && (
+              <div className="flex items-center gap-1.5 flex-wrap">
+                {tagsData.map((tag) => {
+                  const active = tagFilter.has(tag.id);
+                  return (
+                    <button
+                      key={tag.id}
+                      onClick={() => toggleTagFilter(tag.id)}
+                      className="text-xs px-2 py-1 rounded-full border transition font-medium"
+                      style={{
+                        borderColor: tag.color,
+                        color: active ? "white" : tag.color,
+                        backgroundColor: active ? tag.color : "transparent",
+                      }}
+                    >
+                      {tag.name}
+                    </button>
+                  );
+                })}
+                {tagFilter.size > 0 && (
+                  <button
+                    onClick={() => setTagFilter(new Set())}
+                    className="text-xs px-2 py-1 rounded-full border border-border text-muted-foreground hover:bg-accent transition"
+                  >
+                    Clear
+                  </button>
+                )}
+              </div>
+            )}
+
             <span className="text-sm text-muted-foreground">
-              {data?.total ?? 0} task{data?.total !== 1 ? "s" : ""}
+              {tasks.length} task{tasks.length !== 1 ? "s" : ""}
             </span>
           </div>
 
@@ -204,6 +249,19 @@ function ListView({ tasks }: { tasks: Task[] }) {
               <span className="hidden sm:block text-xs font-mono bg-muted px-1.5 py-0.5 rounded text-muted-foreground truncate max-w-[140px]">
                 {task.branch_name}
               </span>
+            )}
+            {task.tags.length > 0 && (
+              <div className="hidden sm:flex items-center gap-1">
+                {task.tags.map((tag) => (
+                  <span
+                    key={tag.id}
+                    className="text-xs px-1.5 py-0.5 rounded-full border font-medium"
+                    style={{ borderColor: tag.color, color: tag.color }}
+                  >
+                    {tag.name}
+                  </span>
+                ))}
+              </div>
             )}
           </div>
           <div className="flex items-center gap-3 flex-shrink-0 ml-4">

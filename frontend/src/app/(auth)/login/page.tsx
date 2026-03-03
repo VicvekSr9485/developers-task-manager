@@ -9,6 +9,7 @@ import { api } from "@/lib/api";
 import { useAppStore } from "@/store/useAppStore";
 import { TokenOut } from "@/types";
 import { cn } from "@/lib/utils";
+import { ArrowLeft } from "lucide-react";
 
 const schema = z.object({
   email: z.string().email("Invalid email"),
@@ -43,15 +44,28 @@ export default function LoginPage() {
       setUser(res.data.user);
       router.push("/tasks");
     } catch (err: unknown) {
+      const detail = (err as { response?: { data?: { detail?: unknown } } })
+        ?.response?.data?.detail;
       const message =
-        (err as { response?: { data?: { detail?: string } } })?.response?.data
-          ?.detail ?? "Something went wrong. Please try again.";
+        Array.isArray(detail)
+          ? (detail as { msg: string }[]).map((e) => e.msg).join(", ")
+          : typeof detail === "string"
+            ? detail
+            : "Something went wrong. Please try again.";
       setServerError(message);
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background px-4">
+    <div className="relative min-h-screen flex items-center justify-center bg-background px-4">
+      {/* Back home */}
+      <button
+        onClick={() => router.push("/")}
+        className="absolute top-4 left-4 flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition"
+      >
+        <ArrowLeft className="w-4 h-4" /> Home
+      </button>
+
       <div className="w-full max-w-md space-y-8">
         {/* Header */}
         <div className="text-center">

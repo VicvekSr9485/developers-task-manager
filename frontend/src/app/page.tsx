@@ -3,6 +3,7 @@
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAppStore } from "@/store/useAppStore";
+import { useTheme } from "next-themes";
 import {
   GitBranch,
   Timer,
@@ -12,6 +13,8 @@ import {
   Clock,
   ArrowRight,
   CheckCircle2,
+  Moon,
+  Sun,
 } from "lucide-react";
 
 const FEATURES = [
@@ -55,6 +58,7 @@ const FEATURES = [
 
 export default function Home() {
   const router = useRouter();
+  const { theme, setTheme } = useTheme();
   const token =
     useAppStore((s) => s.token) ??
     (typeof window !== "undefined" ? localStorage.getItem("access_token") : null);
@@ -72,6 +76,13 @@ export default function Home() {
         <div className="max-w-screen-lg mx-auto px-6 h-14 flex items-center justify-between">
           <span className="font-bold text-lg tracking-tight">DevTaskr</span>
           <div className="flex items-center gap-3">
+            <button
+              onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+              className="p-2 rounded-md hover:bg-accent transition"
+              aria-label="Toggle theme"
+            >
+              {theme === "dark" ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+            </button>
             <button
               onClick={() => router.push("/login")}
               className="text-sm text-muted-foreground hover:text-foreground transition"

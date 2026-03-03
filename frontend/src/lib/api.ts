@@ -18,11 +18,16 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
-// Handle 401 — clear token and redirect to login
+// Handle 401 — clear token and redirect to login (skip for auth endpoints)
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response?.status === 401 && typeof window !== "undefined") {
+    const isAuthEndpoint = error.config?.url?.startsWith("/auth/");
+    if (
+      error.response?.status === 401 &&
+      !isAuthEndpoint &&
+      typeof window !== "undefined"
+    ) {
       localStorage.removeItem("access_token");
       window.location.href = "/login";
     }
